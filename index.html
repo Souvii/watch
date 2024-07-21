@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page with Shuffling Text and Clock Animation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/3.2.7/tailwind.min.css" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-screen #percentage {
+            font-size: 4vw;
+            font-weight: bold;
+            margin-bottom: 2vh;
+        }
+
+        .loading-screen #shuffling-text {
+            font-size: 5vw;
+            font-weight: bold;
+            color: #333;
+            position: absolute;
+            top: 20vh;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .clock {
+            position: relative;
+            width: 20vw;
+            height: 20vw;
+            border: 4px solid #333;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            background: #333;
+        }
+
+        .hour-hand {
+            width: 0.6vw;
+            height: 15vw;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .minute-hand {
+            width: 0.4vw;
+            height: 25vw;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1vw;
+            height: 1vw;
+            background: #333;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer; /* Make it clear it's clickable */
+        }
+
+        .landing-page {
+            display: none; 
+            padding: 20px;
+            text-align: center;
+        }
+
+        .navbar {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen">
+        <div class="clock">
+            <div class="hand hour-hand"></div>
+            <div class="hand minute-hand"></div>
+            <div class="center"></div>
+            <div id="shuffling-text" class="shuffling-text">TITAN</div>
+        </div>
+        <div id="percentage">0%</div>
+    </div>
+
+    <div class="landing-page">
+        <div class="navbar">
+            <a href="#home">Home</a>
+            <a href="#services">Services</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+        </div>
+        <h1>Welcome to the Landing Page!</h1>
+        <p>This is where the main content goes.</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.2/gsap.min.js"></script>
+    <script>
+        function animateClock() {
+            const duration = 5; 
+            gsap.to("#percentage", {
+                duration: duration,
+                innerText: 100,
+                ease: "power1.out",
+                snap: { innerText: 1 },
+                onUpdate: function () {
+                    const element = document.getElementById("percentage");
+                    element.innerText = Math.round(element.innerText) + '%';
+                },
+                onComplete: function () {
+                    // After counting completes, animate the center div to scale down
+                    gsap.to(".center", {
+                        duration: 1,
+                        scale: 50,
+                        ease: "power1.out",
+                        onComplete: function () {
+                            // Transition to landing page after center covers the screen
+                            document.querySelector(".loading-screen").style.display = "none";
+                            document.querySelector(".landing-page").style.display = "block";
+                        }
+                    });
+                }
+            });
+
+            gsap.to(".hour-hand", {
+                rotation: 360,
+                duration: duration,
+                ease: "power1.out",
+                onComplete: function () {
+                    gsap.killTweensOf(".hour-hand");
+                }
+            });
+
+            const textElement = document.querySelector("#shuffling-text");
+            const originalText = textElement.innerText;
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            gsap.fromTo(textElement, 
+                { innerText: originalText }, 
+                {
+                    duration: duration / 2,
+                    ease: "none",
+                    onUpdate: function () {
+                        let randomText = '';
+                        for (let i = 0; i < originalText.length; i++) {
+                            randomText += characters[Math.floor(Math.random() * characters.length)];
+                        }
+                        textElement.innerText = randomText;
+                    },
+                    onComplete: function () {
+                        textElement.innerText = originalText;
+                    }
+                }
+            );
+        }
+
+        window.onload = function() {
+            animateClock();
+        }
+    </script>
+</body>
+</html>
